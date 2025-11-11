@@ -8,7 +8,7 @@ const app = express();
 const port = 3000; 
 
 // IMPORTANT: Paste your active Gemini API Key here (Must be in single quotes)
-const GEMINI_API_KEY = 'AIzaSyCxu2Fzdi9B_A3crKNjjoi4mTbpnvafMr0'; 
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 // Apply middleware
 app.use(cors()); 
