@@ -64,7 +64,7 @@ app.use(express.static(path.join(__dirname, '')));
 app.get('/', (req, res) => {
     // NOTE: If your HTML file is named 'html.html' (as seen in a previous output),
     // you MUST rename it to 'index.html' locally for this line to work correctly.
-    res.sendFile(path.join(__dirname, 'index.html')); 
+    res.sendFile(path.join(__dirname, 'html.html')); 
 });
 // -----------------------------------------------------------------
 
