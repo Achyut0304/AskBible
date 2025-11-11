@@ -1,14 +1,15 @@
-// server.js (Ready for Local Gemini Testing)
+// server.js (FINAL DEPLOYMENT FIX: SERVE STATIC FILES)
 
-// --- Imports (Using require() and the .default fix for fetch) ---
+// --- Imports (Using require() and adding 'path') ---
 const express = require('express');
 const cors = require('cors');
-const fetch = require('node-fetch').default; // THIS IS THE CRITICAL FIX for TypeError: fetch is not a function
+const fetch = require('node-fetch').default; // Critical fetch fix
+const path = require('path'); // CRITICAL: Module to correctly handle file paths
 const app = express();
-const port = 3000; 
+const port = process.env.PORT || 3000; 
 
-// IMPORTANT: Paste your active Gemini API Key here (Must be in single quotes)
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// IMPORTANT: Reads the API key securely from the environment
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
 
 // Apply middleware
 app.use(cors()); 
@@ -22,7 +23,7 @@ app.get('/api/answer', async (req, res) => {
         return res.status(400).json({ answer: 'Question parameter is required.' });
     }
     
-    // 1. Define the AI's spiritual persona and task (The restrictive prompt)
+    // 1. Define the AI's spiritual persona and task
     const systemPrompt = `You are a helpful and compassionate spiritual assistant. Answer the user's question with encouraging, single-paragraph guidance. DO NOT mention or reference any scripture within this initial paragraph. After the guidance paragraph, skip a line, and then provide ONLY ONE relevant Bible verse, including the reference, on a new line. Use the following final format: "The Word says: [Verse Text]" – [Reference].`;
 
     try {
@@ -39,10 +40,8 @@ app.get('/api/answer', async (req, res) => {
         
         const data = await geminiResponse.json();
 
-        // Error checking for API failures (like invalid key or quota)
         if (data.error) {
             console.error('Gemini API Error:', data.error.message);
-            // Returning a clean error for the client
             return res.status(data.error.code || 500).json({ answer: `Gemini API Error: ${data.error.message}. Key not fully active/invalid.` });
         }
 
@@ -55,8 +54,20 @@ app.get('/api/answer', async (req, res) => {
     }
 });
 
-// Serve static frontend files (Needed for local testing)
-app.use(express.static(process.cwd()));
+// -----------------------------------------------------------------
+// --- CRITICAL DEPLOYMENT FIX: Serve Frontend Files ---
+
+// 1. Tell Express where to find static assets (CSS, JS, images)
+app.use(express.static(path.join(__dirname, ''))); 
+
+// 2. Explicitly serve index.html when a user hits the base URL (/)
+app.get('/', (req, res) => {
+    // NOTE: If your HTML file is named 'html.html' (as seen in a previous output),
+    // you MUST rename it to 'index.html' locally for this line to work correctly.
+    res.sendFile(path.join(__dirname, 'index.html')); 
+});
+// -----------------------------------------------------------------
+
 
 // --- Start the server ---
 app.listen(port, () => {
